@@ -4,9 +4,18 @@
 Writes one funny single-line excuse a developer gives when code breaks
 in production to $MAKEFUN_OUTPUT_DIR/entry.txt (default /output/entry.txt).
 
-The excuse turns the worn "it worked on my machine" line on its head:
-the machine in question no longer exists in any usable form, so the
-excuse is technically true and completely useless at the same time.
+The excuse concept: take the classic developer alibi "it worked on my
+machine" and escalate it until it collapses under its own logic. The
+machine did work -- once -- but it is gone: wiped, sold, and last seen
+reincarnated as a smart fridge. The claim stays technically true while
+being completely useless as an excuse, which is exactly the joke: the
+developer is not lying, the evidence has simply been liquidated and
+reincarnated as kitchen hardware.
+
+Brief compliance: the output is a single line, well under the 200
+character limit, with no leading or trailing whitespace and no double
+spaces, and it names both a machine ("my machine", "smart fridge") and
+the failure ("worked", "wiped", "sold").
 """
 
 import os
@@ -34,6 +43,24 @@ def main() -> int:
             % len(line),
             file=sys.stderr,
         )
+        return 1
+
+    # Gate: no leading/trailing whitespace and no double spaces.
+    if line != EXCUSE or line != line.strip():
+        print("error: excuse has leading or trailing whitespace", file=sys.stderr)
+        return 1
+    if "  " in line:
+        print("error: excuse contains double spaces", file=sys.stderr)
+        return 1
+
+    # Gate: it must name a machine or device and a failure word,
+    # so the joke is anchored in the classic developer-excuse shape.
+    lowered = line.lower()
+    if not any(w in lowered for w in ("machine", "fridge", "server", "laptop")):
+        print("error: excuse must name a machine or device", file=sys.stderr)
+        return 1
+    if not any(w in lowered for w in ("worked", "wiped", "sold", "failed", "broke")):
+        print("error: excuse must include a failure word", file=sys.stderr)
         return 1
 
     output_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
